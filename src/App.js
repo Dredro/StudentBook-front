@@ -1,121 +1,111 @@
-import React, { useState, useRef } from "react";
-import './App.css'
+import React, { useState, useRef, useEffect } from "react";
+import "./App.css";
+
+const baseURL = "https://jsapi.vectorgamedev.com/api"; // API base URL
+
 const App = () => {
     const [posts, setPosts] = useState([]);
     const [newPost, setNewPost] = useState({ author: "", title: "", description: "", image: "" });
     const [sortOption, setSortOption] = useState("latest");
-    const [followedUsers, setFollowedUsers] = useState([]); // Lista obserwowanych użytkowników
-    const [displayedPosts, setDisplayedPosts] = useState([]); // Posty wyświetlane na ekranie
+    const [followedUsers, setFollowedUsers] = useState([]);
     const fileInputRef = useRef(null);
 
-    // Mock data for demonstration
-    const mockPosts = [
-        {
-            id: 1,
-            author: "John Doe",
-            title: "Welcome to my blog",
-            description: "Hello, world!",
-            image: "",
-            likes: 5,
-            comments: [],
-        },
-        {
-            id: 2,
-            author: "Jane Smith",
-            title: "Learning React",
-            description: "React is amazing!",
-            image: "",
-            likes: 8,
-            comments: [],
-        },
-    ];
-
-    // Load mock posts
-    React.useEffect(() => {
-        setPosts(mockPosts);
-        setDisplayedPosts(mockPosts); // Inicjalizacja wyświetlanych postów
+    // Fetch posts from the backend
+    useEffect(() => {
+        fetch(`${baseURL}/posts`)
+            .then((response) => response.json())
+            .then((data) => setPosts(data))
+            .catch((error) => console.error("Error fetching posts:", error));
     }, []);
 
-    // Add a new post
-    const handleAddPost = () => {
-        const newPostData = { ...newPost, id: posts.length + 1, likes: 0, comments: [] };
-        const updatedPosts = [newPostData, ...posts];
-        setPosts(updatedPosts);
-        setDisplayedPosts(updatedPosts);
-        setNewPost({ author: "", title: "", description: "", image: "" });
-
-        // Reset input pliku
-        if (fileInputRef.current) {
-            fileInputRef.current.value = null;
+    const getSortedPosts = () => {
+        let sortedPosts = [...posts];
+        if (sortOption === "followed") {
+            sortedPosts = sortedPosts.filter((post) => followedUsers.includes(post.author));
+        } else if (sortOption === "latest") {
+            sortedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (sortOption === "popular") {
+            sortedPosts.sort((a, b) => b.likes - a.likes);
         }
+        return sortedPosts;
     };
 
-    // Handle image upload
+    const handleAddPost = () => {
+        if (!newPost.author || !newPost.title || !newPost.description) return;
+
+        const postData = { ...newPost, image: newPost.image || "" };
+
+        fetch(`${baseURL}/posts`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(postData),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                setPosts((prevPosts) => [data, ...prevPosts]);
+                setNewPost({ author: "", title: "", description: "", image: "" });
+                if (fileInputRef.current) fileInputRef.current.value = null;
+            })
+            .catch((error) => console.error("Error adding post:", error));
+    };
+
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setNewPost((prevPost) => ({ ...prevPost, image: reader.result }));
+                setNewPost((prev) => ({ ...prev, image: reader.result }));
             };
             reader.readAsDataURL(file);
         }
     };
 
-    // Add a like to a post
     const handleLikePost = (postId) => {
-        const updatedPosts = posts.map((post) =>
-            post.id === postId ? { ...post, likes: post.likes + 1 } : post
-        );
-        setPosts(updatedPosts);
-        setDisplayedPosts(updatedPosts);
+        fetch(`${baseURL}/posts/${postId}/like`, { method: "POST" })
+            .then((response) => response.json())
+            .then((updatedPost) => {
+                setPosts((prevPosts) =>
+                    prevPosts.map((post) => (post._id === postId ? updatedPost : post))
+                );
+            })
+            .catch((error) => console.error("Error liking post:", error));
     };
 
-    // Add a comment to a post
     const handleAddComment = (postId, commentBody) => {
-        const updatedPosts = posts.map((post) => {
-            if (post.id === postId) {
-                return {
-                    ...post,
-                    comments: [...post.comments, { userName: "Anonymous", body: commentBody, likes: 0 }],
-                };
-            }
-            return post;
-        });
-        setPosts(updatedPosts);
-        setDisplayedPosts(updatedPosts);
+        if (!commentBody.trim()) return;
+
+        const commentData = { postId, userName: "Anonymous", body: commentBody };
+
+        fetch(`${baseURL}/comments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(commentData),
+        })
+            .then((response) => response.json())
+            .then((newComment) => {
+                setPosts((prevPosts) =>
+                    prevPosts.map((post) =>
+                        post._id === postId
+                            ? { ...post, comments: [...post.comments, newComment] }
+                            : post
+                    )
+                );
+            })
+            .catch((error) => console.error("Error adding comment:", error));
     };
 
-    // Follow/unfollow a user
     const handleFollowUser = (author) => {
-        setFollowedUsers((prevFollowed) =>
-            prevFollowed.includes(author)
-                ? prevFollowed.filter((user) => user !== author) // Unfollow
-                : [...prevFollowed, author] // Follow
+        setFollowedUsers((prev) =>
+            prev.includes(author) ? prev.filter((user) => user !== author) : [...prev, author]
         );
     };
 
-    // Sort posts on demand
-    const handleSortChange = (newSortOption) => {
-        setSortOption(newSortOption);
-        let sortedPosts = [...posts];
-
-        if (newSortOption === "followed") {
-            sortedPosts = sortedPosts.filter((post) => followedUsers.includes(post.author));
-        } else if (newSortOption === "latest") {
-            sortedPosts.sort((a, b) => b.id - a.id);
-        } else if (newSortOption === "popular") {
-            sortedPosts.sort((a, b) => b.likes - a.likes);
-        }
-
-        setDisplayedPosts(sortedPosts);
-    };
+    const sortedPosts = getSortedPosts();
 
     return (
         <div className="App">
             <h1>Social Media App</h1>
 
-            {/* Add Post Form */}
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -143,38 +133,28 @@ const App = () => {
                     onChange={(e) => setNewPost({ ...newPost, description: e.target.value })}
                     required
                 ></textarea>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    ref={fileInputRef} // Referencja do inputu
-                />
+                <input type="file" accept="image/*" onChange={handleImageUpload} ref={fileInputRef} />
                 <button type="submit">Add Post</button>
             </form>
 
-            {/* Sort Options */}
             <div className="SortOptions">
                 <label>Sort by:</label>
-                <select
-                    onChange={(e) => handleSortChange(e.target.value)}
-                    value={sortOption}
-                >
+                <select onChange={(e) => setSortOption(e.target.value)} value={sortOption}>
                     <option value="latest">Latest</option>
                     <option value="popular">Most Liked</option>
                     <option value="followed">Followed Users</option>
                 </select>
             </div>
 
-            {/* Post List */}
             <div className="PostList">
-                {displayedPosts.map((post) => (
+                {sortedPosts.map((post) => (
                     <Post
-                        key={post.id}
+                        key={post._id}
                         post={post}
                         followedUsers={followedUsers}
-                        onLike={() => handleLikePost(post.id)}
+                        onLike={() => handleLikePost(post._id)}
                         onFollow={() => handleFollowUser(post.author)}
-                        onAddComment={(commentBody) => handleAddComment(post.id, commentBody)}
+                        onAddComment={(commentBody) => handleAddComment(post._id, commentBody)}
                     />
                 ))}
             </div>
@@ -205,7 +185,6 @@ const Post = ({ post, followedUsers, onLike, onFollow, onAddComment }) => {
                 {followedUsers.includes(post.author) ? "Unfollow" : "Follow"}
             </button>
 
-            {/* Comments */}
             <div className="Comments">
                 <h3>Comments</h3>
                 <ul>
