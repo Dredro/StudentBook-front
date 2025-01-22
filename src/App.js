@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-
+import './App.css'
 const App = () => {
     const [posts, setPosts] = useState([]);
     const [newPost, setNewPost] = useState({ author: "", title: "", description: "", image: "" });
