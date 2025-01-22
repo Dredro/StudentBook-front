@@ -1,179 +1,161 @@
-// frontend/src/App.js
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react"
 import "./App.css";
 
-const baseURL = "http://localhost:4000/api"; // Zmieniaj wg potrzeb
+
+const baseURL = "http://localhost:4000/api"
 
 const App = () => {
-    // ------ AUTH ------
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [loggedInUser, setLoggedInUser] = useState(null); // { token, username, userId }
-    const [authMode, setAuthMode] = useState("login");
-    const [errorMsg, setErrorMsg] = useState("");
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const [loggedInUser, setLoggedInUser] = useState(null)
+    const [authMode, setAuthMode] = useState("login")
+    const [errorMsg, setErrorMsg] = useState("")
+    const [posts, setPosts] = useState([])
+    const [newPost, setNewPost] = useState({ title: "", description: "", image: "" })
+    const [sortOption, setSortOption] = useState("latest")
+    const fileInputRef = useRef(null)
 
-    // ------ POSTY ------
-    const [posts, setPosts] = useState([]);
-    const [newPost, setNewPost] = useState({ title: "", description: "", image: "" });
-    const [sortOption, setSortOption] = useState("latest");
-    const fileInputRef = useRef(null);
-
-    // ========== POBIERANIE POSTÓW ==========
     const fetchPosts = () => {
-        // Jeśli jesteśmy zalogowani, dołączymy token w nagłówku,
-        // żeby backend wiedział, czy dany user followuje autora
-        const headers = {};
+        const headers = {}
         if (loggedInUser?.token) {
-            headers["Authorization"] = `Bearer ${loggedInUser.token}`;
+            headers["Authorization"] = `Bearer ${loggedInUser.token}`
         }
-
         fetch(`${baseURL}/posts`, { headers })
             .then((res) => res.json())
             .then((data) => {
-                setPosts(data);
+                setPosts(data)
             })
-            .catch((err) => console.error("Error fetching posts:", err));
-    };
+            .catch((err) => console.error("Error fetching posts:", err))
+    }
 
     useEffect(() => {
-        fetchPosts();
-        // fetch dopiero po zmianie loggedInUser, żeby ewentualnie
-        // zaktualizować isFollowingAuthor dla poszczególnych postów
-    }, [loggedInUser]);
+        fetchPosts()
+    }, [loggedInUser])
 
-    // ========== REJESTRACJA / LOGOWANIE ==========
     const handleRegister = async () => {
-        setErrorMsg("");
+        setErrorMsg("")
         try {
             const res = await fetch(`${baseURL}/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
-            });
-            const data = await res.json();
+                body: JSON.stringify({ username, password })
+            })
+            const data = await res.json()
             if (!res.ok) {
-                setErrorMsg(data.error || "Błąd rejestracji");
+                setErrorMsg(data.error || "Błąd rejestracji")
             } else {
-                alert("Zarejestrowano! Teraz możesz się zalogować.");
-                setAuthMode("login");
+                alert("Zarejestrowano! Teraz możesz się zalogować.")
+                setAuthMode("login")
             }
         } catch (err) {
-            setErrorMsg("Błąd połączenia z serwerem");
+            setErrorMsg("Błąd połączenia z serwerem")
         }
-    };
+    }
 
     const handleLogin = async () => {
-        setErrorMsg("");
+        setErrorMsg("")
         try {
             const res = await fetch(`${baseURL}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
-            });
-            const data = await res.json();
+                body: JSON.stringify({ username, password })
+            })
+            const data = await res.json()
             if (!res.ok) {
-                setErrorMsg(data.error || "Błąd logowania");
+                setErrorMsg(data.error || "Błąd logowania")
             } else {
-                setLoggedInUser({ token: data.token, username: data.username, userId: data.userId });
-                setUsername("");
-                setPassword("");
+                setLoggedInUser({ token: data.token, username: data.username, userId: data.userId })
+                setUsername("")
+                setPassword("")
             }
         } catch (err) {
-            setErrorMsg("Błąd połączenia z serwerem");
+            setErrorMsg("Błąd połączenia z serwerem")
         }
-    };
+    }
 
     const handleLogout = () => {
-        setLoggedInUser(null);
-        setErrorMsg("");
-    };
+        setLoggedInUser(null)
+        setErrorMsg("")
+    }
 
-    // ========== DODAWANIE NOWEGO POSTA ==========
     const handleAddPost = async () => {
         if (!loggedInUser) {
-            alert("Musisz być zalogowany, aby dodać post");
-            return;
+            alert("Musisz być zalogowany, aby dodać post")
+            return
         }
-        if (!newPost.title || !newPost.description) return;
-
+        if (!newPost.title || !newPost.description) return
         try {
             const res = await fetch(`${baseURL}/posts`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${loggedInUser.token}`,
+                    Authorization: `Bearer ${loggedInUser.token}`
                 },
-                body: JSON.stringify(newPost),
-            });
-            const data = await res.json();
+                body: JSON.stringify(newPost)
+            })
+            const data = await res.json()
             if (!res.ok) {
-                console.error("Error adding post:", data.error);
+                console.error("Error adding post:", data.error)
             } else {
-                setPosts((prev) => [data, ...prev]); // wstawiamy nowy post na początek
-                setNewPost({ title: "", description: "", image: "" });
-                if (fileInputRef.current) fileInputRef.current.value = null;
+                setPosts((prev) => [data, ...prev])
+                setNewPost({ title: "", description: "", image: "" })
+                if (fileInputRef.current) fileInputRef.current.value = null
             }
         } catch (err) {
-            console.error("Error adding post:", err);
+            console.error("Error adding post:", err)
         }
-    };
+    }
 
-    // ========== OBSŁUGA UPLOADU OBRAZU (BASE64) ==========
     const handleImageUpload = (e) => {
-        const file = e.target.files[0];
+        const file = e.target.files[0]
         if (file) {
-            const reader = new FileReader();
+            const reader = new FileReader()
             reader.onloadend = () => {
-                setNewPost((prev) => ({ ...prev, image: reader.result }));
-            };
-            reader.readAsDataURL(file);
+                setNewPost((prev) => ({ ...prev, image: reader.result }))
+            }
+            reader.readAsDataURL(file)
         }
-    };
+    }
 
-    // ========== LIKE / UNLIKE ==========
     const handleLikePost = async (postId) => {
         if (!loggedInUser) {
-            alert("Musisz być zalogowany, aby polubić post");
-            return;
+            alert("Musisz być zalogowany, aby polubić post")
+            return
         }
         try {
             const res = await fetch(`${baseURL}/posts/${postId}/like`, {
                 method: "POST",
-                headers: { Authorization: `Bearer ${loggedInUser.token}` },
-            });
-            const updatedPost = await res.json();
+                headers: { Authorization: `Bearer ${loggedInUser.token}` }
+            })
+            const updatedPost = await res.json()
             if (!res.ok) {
-                console.error("Error liking post:", updatedPost.error);
+                console.error("Error liking post:", updatedPost.error)
             } else {
-                setPosts((prev) =>
-                    prev.map((p) => (p.id === updatedPost.id ? updatedPost : p))
-                );
+                setPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)))
             }
         } catch (err) {
-            console.error("Error liking post:", err);
+            console.error("Error liking post:", err)
         }
-    };
+    }
 
-    // ========== KOMENTARZE ==========
     const handleAddComment = async (postId, commentBody) => {
         if (!loggedInUser) {
-            alert("Musisz być zalogowany, aby komentować");
-            return;
+            alert("Musisz być zalogowany, aby komentować")
+            return
         }
-        if (!commentBody.trim()) return;
-
+        if (!commentBody.trim()) return
         try {
             const res = await fetch(`${baseURL}/comments`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${loggedInUser.token}`,
+                    Authorization: `Bearer ${loggedInUser.token}`
                 },
-                body: JSON.stringify({ postId, body: commentBody }),
-            });
-            const newComment = await res.json();
+                body: JSON.stringify({ postId, body: commentBody })
+            })
+            const newComment = await res.json()
             if (!res.ok) {
-                console.error("Error adding comment:", newComment.error);
+                console.error("Error adding comment:", newComment.error)
             } else {
                 setPosts((prev) =>
                     prev.map((post) =>
@@ -181,64 +163,78 @@ const App = () => {
                             ? { ...post, comments: [...post.comments, newComment] }
                             : post
                     )
-                );
+                )
             }
         } catch (err) {
-            console.error("Error adding comment:", err);
+            console.error("Error adding comment:", err)
         }
-    };
+    }
 
-    // ========== FOLLOW / UNFOLLOW AUTORA POSTA ==========
     const handleFollowAuthor = async (authorId) => {
         if (!loggedInUser) {
-            alert("Musisz być zalogowany, aby followować");
-            return;
+            alert("Musisz być zalogowany, aby followować")
+            return
         }
         try {
             const res = await fetch(`${baseURL}/users/${authorId}/follow`, {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${loggedInUser.token}`,
-                },
-            });
-            const data = await res.json();
+                    Authorization: `Bearer ${loggedInUser.token}`
+                }
+            })
+            const data = await res.json()
             if (!res.ok) {
-                console.error("Error following/unfollowing user:", data.error);
+                console.error("Error following/unfollowing user:", data.error)
             } else {
-                // Po udanym follow/unfollow pobierz posty ponownie,
-                // aby zaktualizować isFollowingAuthor
-                fetchPosts();
+                fetchPosts()
             }
         } catch (err) {
-            console.error("Error following user:", err);
+            console.error("Error following user:", err)
         }
-    };
+    }
 
-    // ========== SORTOWANIE POSTÓW LOKALNIE ==========
-    // (backend daje nam listę postów, a my je filtrujemy/sortujemy)
+    const handleEditPost = async (postId, updatedData) => {
+        if (!loggedInUser) {
+            alert("Musisz być zalogowany, aby edytować post")
+            return
+        }
+        try {
+            const res = await fetch(`${baseURL}/posts/${postId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${loggedInUser.token}`
+                },
+                body: JSON.stringify(updatedData)
+            })
+            const updatedPost = await res.json()
+            if (!res.ok) {
+                console.error("Błąd edycji posta:", updatedPost.error)
+                return
+            }
+            setPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)))
+        } catch (err) {
+            console.error("Błąd połączenia podczas edycji posta:", err)
+        }
+    }
+
     const getSortedPosts = () => {
-        let sorted = [...posts];
-
+        let sorted = [...posts]
         if (sortOption === "followed") {
-            // Pokaż tylko te posty, gdzie isFollowingAuthor = true
-            sorted = sorted.filter((p) => p.isFollowingAuthor);
+            sorted = sorted.filter((p) => p.isFollowingAuthor)
         } else if (sortOption === "latest") {
-            sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         } else if (sortOption === "popular") {
-            sorted.sort((a, b) => b.likesCount - a.likesCount);
+            sorted.sort((a, b) => b.likesCount - a.likesCount)
         }
+        return sorted
+    }
 
-        return sorted;
-    };
-
-    // ========== RENDER ==========
-    const sortedPosts = getSortedPosts();
+    const sortedPosts = getSortedPosts()
 
     return (
         <div className="App">
             <h1>Social Media App</h1>
-
-            {/* Panel logowania/rejestracji */}
             {!loggedInUser ? (
                 <div className="AuthPanel">
                     <h2>{authMode === "login" ? "Zaloguj się" : "Zarejestruj się"}</h2>
@@ -270,13 +266,11 @@ const App = () => {
                     <button onClick={handleLogout}>Wyloguj</button>
                 </div>
             )}
-
-            {/* Formularz dodawania posta (tylko zalogowany user) */}
             {loggedInUser && (
                 <form
                     onSubmit={(e) => {
-                        e.preventDefault();
-                        handleAddPost();
+                        e.preventDefault()
+                        handleAddPost()
                     }}
                     className="PostForm"
                 >
@@ -297,8 +291,6 @@ const App = () => {
                     <button type="submit">Add Post</button>
                 </form>
             )}
-
-            {/* Sortowanie postów */}
             <div className="SortOptions">
                 <label>Sort by:</label>
                 <select onChange={(e) => setSortOption(e.target.value)} value={sortOption}>
@@ -307,8 +299,6 @@ const App = () => {
                     <option value="followed">Followed Users</option>
                 </select>
             </div>
-
-            {/* Lista postów */}
             <div className="PostList">
                 {sortedPosts.map((post) => (
                     <Post
@@ -318,47 +308,96 @@ const App = () => {
                         onLike={() => handleLikePost(post.id)}
                         onAddComment={(commentBody) => handleAddComment(post.id, commentBody)}
                         onFollowAuthor={() => handleFollowAuthor(post.authorId)}
+                        onEditPost={handleEditPost}
                     />
                 ))}
             </div>
         </div>
-    );
-};
+    )
+}
 
-// Komponent Post
-const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor }) => {
-    const [commentBody, setCommentBody] = useState("");
+const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor, onEditPost }) => {
+    const [commentBody, setCommentBody] = useState("")
+    const [isEditing, setIsEditing] = useState(false)
+    const [editTitle, setEditTitle] = useState(post.title)
+    const [editDescription, setEditDescription] = useState(post.description)
+    const [editImage, setEditImage] = useState(post.image)
 
     const handleSubmitComment = (e) => {
-        e.preventDefault();
-        onAddComment(commentBody);
-        setCommentBody("");
-    };
+        e.preventDefault()
+        onAddComment(commentBody)
+        setCommentBody("")
+    }
+
+    const handleStartEditing = () => {
+        setEditTitle(post.title)
+        setEditDescription(post.description)
+        setEditImage(post.image)
+        setIsEditing(true)
+    }
+
+    const handleCancelEditing = () => {
+        setIsEditing(false)
+    }
+
+    const handleSaveEdit = () => {
+        onEditPost(post.id, {
+            title: editTitle,
+            description: editDescription,
+            image: editImage
+        })
+        setIsEditing(false)
+    }
+
+    const handleChangeImage = (e) => {
+        const file = e.target.files[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                setEditImage(reader.result)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
 
     return (
         <div className="Post">
-            <h2>{post.title}</h2>
-            <h4>by {post.author}</h4>
-            <p>{post.description}</p>
-            {post.image && <img src={post.image} alt="Uploaded" style={{ maxWidth: "100%" }} />}
-
+            {isEditing ? (
+                <div className="EditPostForm">
+                    <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                    />
+                    <textarea
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                    />
+                    {editImage && <img src={editImage} alt="Uploaded" style={{ maxWidth: "100%" }} />}
+                    <input type="file" accept="image/*" onChange={handleChangeImage} />
+                    <button onClick={handleSaveEdit}>Zapisz</button>
+                    <button onClick={handleCancelEditing}>Anuluj</button>
+                </div>
+            ) : (
+                <>
+                    <h2>{post.title}</h2>
+                    <h4>by {post.author}</h4>
+                    <p>{post.description}</p>
+                    {post.image && <img src={post.image} alt="Uploaded" style={{ maxWidth: "100%" }} />}
+                </>
+            )}
             <div>
-                <button onClick={onLike}>
-                    {/* Tylko informacja: "Polub / Lubię to" */}
-                    {post.likesCount > 0 ? "Like/Unlike" : "Like"}
-                </button>
+                <button onClick={onLike}>{post.likesCount > 0 ? "Like/Unlike" : "Like"}</button>
                 <span>Likes: {post.likesCount}</span>
             </div>
-
-            {/* Follow/Unfollow autora, jeżeli user jest zalogowany i autor to nie my sami */}
             {loggedInUser && post.authorId && post.authorId !== loggedInUser.userId && (
                 <div>
-                    <button onClick={onFollowAuthor}>
-                        {post.isFollowingAuthor ? "Unfollow" : "Follow"}
-                    </button>
+                    <button onClick={onFollowAuthor}>{post.isFollowingAuthor ? "Unfollow" : "Follow"}</button>
                 </div>
             )}
-
+            {loggedInUser && post.authorId === loggedInUser.userId && !isEditing && (
+                <button onClick={handleStartEditing}>Edit</button>
+            )}
             <div className="Comments">
                 <h3>Comments</h3>
                 <ul>
@@ -382,7 +421,7 @@ const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor }) => {
                 )}
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default App;
+export default App

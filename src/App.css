@@ -1,171 +1,50 @@
-/* Global Styles */
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f4f4f9;
-  margin: 0;
-  padding: 0;
-  line-height: 1.6;
-  color: #333;
-}
-
-h1, h2, h3 {
-  color: #222;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-button {
-  cursor: pointer;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-/* App Container */
 .App {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  background: #fff;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  font-family: Arial, sans-serif;
 }
 
-/* Form Styles */
+.AuthPanel,
+.UserPanel {
+  margin-bottom: 20px;
+}
+
 .PostForm {
-  margin-bottom: 20px;
-}
-
-.PostForm input,
-.PostForm textarea {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-.PostForm button {
-  background-color: #007bff;
-  color: #fff;
-}
-
-.PostForm button:hover {
-  background-color: #0056b3;
-}
-
-/* Sort Options */
-.SortOptions {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
-.SortOptions label {
-  margin-right: 10px;
-  font-weight: bold;
+.SortOptions {
+  margin-bottom: 20px;
 }
 
-.SortOptions select {
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-}
-
-/* Post List */
 .PostList {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Individual Post */
 .Post {
-  background: #f9f9f9;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.Post h2 {
-  font-size: 18px;
-  margin: 0 0 10px 0;
-}
-
-.Post p {
-  margin: 10px 0;
-}
-
-.Post img {
-  max-width: 100%;
+  border: 1px solid #ccc;
+  padding: 10px;
   border-radius: 5px;
+}
+
+.Comments {
   margin-top: 10px;
 }
 
-.Post button {
-  background-color: #28a745;
-  color: #fff;
-  margin-right: 10px;
+.CommentForm {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
 }
 
-.Post button:hover {
-  background-color: #218838;
-}
-
-.Post .Comments {
-  margin-top: 15px;
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
-}
-
-.Post .Comments h3 {
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.Post .Comments ul {
-  list-style: none;
-  padding: 0;
-}
-
-.Post .Comments li {
-  background: #f0f0f0;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-}
-
-.Post .Comments button {
-  background-color: #ffc107;
-  color: #fff;
-}
-
-.Post .Comments button:hover {
-  background-color: #e0a800;
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-  .App {
-    padding: 10px;
-  }
-
-  .SortOptions {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .SortOptions select {
-    margin-top: 5px;
-  }
+.EditPostForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
