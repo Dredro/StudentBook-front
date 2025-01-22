@@ -1,187 +1,226 @@
 :root {
-  --primary-color: #4f46e5;
-  --secondary-color: #f9fafb;
-  --text-color: #111827;
-  --error-color: #dc2626;
-  --border-radius: 6px;
+  --bg-color: #f9fafb;
+  --primary-color: #2b6cb0;
+  --primary-hover: #2c5282;
+  --text-color: #1a202c;
+  --border-radius: 4px;
   --transition-speed: 0.2s;
-  --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  padding: 0;
-  font-family: "Inter", sans-serif;
-  background-color: var(--secondary-color);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
   color: var(--text-color);
 }
 
-/* Kontener aplikacji, wycentrowany na stronie */
 .App {
-  display: flex;
-  flex-direction: column;
-  align-items: center;  /* Wycentrowanie poziome */
-  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-/* Szerokość nagłówka dopełnia design, a sam jest wyśrodkowany tekstowo */
-h1 {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-/* Panele i formularze wycentrowane, z maksymalną szerokością */
-.AuthPanel,
-.UserPanel,
-.PostForm,
-.SortOptions {
-  background-color: white;
-  padding: 20px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  margin-bottom: 20px;
-  max-width: 600px;      /* aby nie rozciągały się za bardzo */
-  width: 100%;
-  text-align: center;    /* wyśrodkuj tekst */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.AuthPanel h2,
-.PostForm h2 {
+h1,
+h2,
+h3,
+h4 {
   margin-top: 0;
 }
 
-.ErrorMsg {
-  color: var(--error-color);
-  margin-bottom: 10px;
-}
-
-/* Formularze i pola wypełniają szerokość elementu-rodzica (max 600px) */
-input[type="text"],
-input[type="password"],
-input[type="file"],
-textarea,
-select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  outline: none;
-  transition: border-color var(--transition-speed);
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--primary-color);
-}
-
-/* Przyciski */
 button {
   cursor: pointer;
-  outline: none;
+  transition: background-color var(--transition-speed) ease;
   border: none;
-  font-size: 14px;
-  transition: background-color var(--transition-speed), opacity var(--transition-speed);
   border-radius: var(--border-radius);
 }
 
-button:hover {
-  opacity: 0.9;
+button:focus {
+  outline: none;
 }
 
 .PrimaryButton {
   background-color: var(--primary-color);
-  color: white;
-  padding: 10px 16px;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+}
+
+.PrimaryButton:hover {
+  background-color: var(--primary-hover);
 }
 
 .SwitchButton,
 .LogoutButton,
-.FollowButton,
-.LikeButton,
+.CancelButton,
 .EditButton,
-.CancelButton {
-  background-color: #6b7280;
-  color: white;
-  padding: 8px 14px;
-  margin-right: 5px;
+.FollowButton,
+.LikeButton {
+  background-color: #e2e8f0;
+  color: var(--text-color);
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
 }
 
-/* Lista postów też wycentrowana, każdy post ma max 600px */
+.SwitchButton:hover,
+.LogoutButton:hover,
+.CancelButton:hover,
+.EditButton:hover,
+.FollowButton:hover,
+.LikeButton:hover {
+  background-color: #cbd5e0;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.AuthPanel,
+.UserPanel {
+  background: #fff;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.AuthPanel h2,
+.UserPanel p {
+  margin-bottom: 1rem;
+}
+
+.AuthPanel input,
+.UserPanel input {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.6rem;
+  border: 1px solid #cbd5e0;
+  border-radius: var(--border-radius);
+}
+
+.PostForm {
+  background: #fff;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.PostForm h2 {
+  margin-bottom: 1rem;
+}
+
+.PostForm input[type="text"],
+.PostForm textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.6rem;
+  border: 1px solid #cbd5e0;
+  border-radius: var(--border-radius);
+}
+
+.SortOptions {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.SortOptions label {
+  margin-right: 0.5rem;
+  font-weight: 600;
+}
+
 .PostList {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 600px;
+  gap: 1.5rem;
 }
 
-/* Pojedynczy post w białym tle, wyśrodkowany wewnątrz */
 .Post {
-  background-color: white;
-  padding: 20px;
+  background: #fff;
+  padding: 1.5rem;
   border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Obrazek posta */
+.Post h2 {
+  margin-bottom: 0.5rem;
+}
+
+.Post h4 {
+  margin: 0 0 1rem;
+  font-weight: normal;
+  color: #4a5568;
+}
+
+.Post p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
 .PostImage {
   max-width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 1rem;
   border-radius: var(--border-radius);
-  margin-top: 10px;
 }
 
-/* Sekcja akcji przy poście */
 .PostActions {
   display: flex;
   align-items: center;
-  justify-content: center; /* wycentruj przyciski */
-  gap: 10px;
-  margin-top: 10px;
+  margin-bottom: 1rem;
 }
 
 .LikeCount {
-  font-weight: bold;
+  margin-left: 0.5rem;
 }
 
-/* Górny panel zalogowanego użytkownika */
-.UserPanel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  max-width: 600px;
+.Comments h3 {
+  margin-bottom: 0.5rem;
 }
 
-/* Nagłówek w formularzu posta */
-.PostForm h2 {
-  margin-bottom: 15px;
+.Comments ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 1rem 0;
 }
 
-/* Formularz komentarzy przy poście */
+.Comments li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
 .CommentForm {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  width: 100%;
+  margin-top: 1rem;
 }
 
-/* Sekcja edycji posta */
-.EditPostForm {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.CommentForm input[type="text"] {
+  flex: 1;
+  margin-right: 0.5rem;
+  padding: 0.6rem;
+  border: 1px solid #cbd5e0;
+  border-radius: var(--border-radius);
+}
+
+.EditPostForm input[type="text"],
+.EditPostForm textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.6rem;
+  border: 1px solid #cbd5e0;
+  border-radius: var(--border-radius);
 }
 
 .EditPostActions {
   display: flex;
-  gap: 10px;
-  justify-content: center; /* wycentruj przyciski zapisu/anulacji */
-  margin-top: 10px;
+  gap: 0.5rem;
 }
