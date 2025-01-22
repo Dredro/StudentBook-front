@@ -2,41 +2,46 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 
-const baseURL = "http://localhost:4000/api"; // Adres Twojego backendu
+const baseURL = "http://localhost:4000/api"; // Zmieniaj wg potrzeb
 
 const App = () => {
-    // ------ Stan dotyczący usera (logowanie) ------
+    // ------ AUTH ------
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loggedInUser, setLoggedInUser] = useState(null); // { token, username, userId }
-    const [authMode, setAuthMode] = useState("login"); // "login" lub "register"
+    const [authMode, setAuthMode] = useState("login");
     const [errorMsg, setErrorMsg] = useState("");
 
-    // ------ Stan dotyczący postów ------
+    // ------ POSTY ------
     const [posts, setPosts] = useState([]);
     const [newPost, setNewPost] = useState({ title: "", description: "", image: "" });
     const [sortOption, setSortOption] = useState("latest");
     const fileInputRef = useRef(null);
 
-    // ------ Komu obserwujemy (IDs) ------
-    // W tym przykładzie wyciągamy z userów, którzy mają w followers ID naszego usera,
-    // ale najprościej: w fetchu /posts i /users zapisywać w state, itd.
-    // Dla uproszczenia front w tym przykładzie przechowuje "followedUsers" po stronie klienta
-    // Możesz jednak pobrać to z backendu.
-    const [followedUsers, setFollowedUsers] = useState([]);
+    // ========== POBIERANIE POSTÓW ==========
+    const fetchPosts = () => {
+        // Jeśli jesteśmy zalogowani, dołączymy token w nagłówku,
+        // żeby backend wiedział, czy dany user followuje autora
+        const headers = {};
+        if (loggedInUser?.token) {
+            headers["Authorization"] = `Bearer ${loggedInUser.token}`;
+        }
 
-    // Pobierz listę postów (bez tokena – endpoint jest publiczny)
-    useEffect(() => {
-        fetch(`${baseURL}/posts`)
-            .then((response) => response.json())
+        fetch(`${baseURL}/posts`, { headers })
+            .then((res) => res.json())
             .then((data) => {
                 setPosts(data);
             })
-            .catch((error) => console.error("Error fetching posts:", error));
-    }, []);
+            .catch((err) => console.error("Error fetching posts:", err));
+    };
 
-    // ======= Funkcje logowania / rejestracji =======
+    useEffect(() => {
+        fetchPosts();
+        // fetch dopiero po zmianie loggedInUser, żeby ewentualnie
+        // zaktualizować isFollowingAuthor dla poszczególnych postów
+    }, [loggedInUser]);
 
+    // ========== REJESTRACJA / LOGOWANIE ==========
     const handleRegister = async () => {
         setErrorMsg("");
         try {
@@ -49,7 +54,7 @@ const App = () => {
             if (!res.ok) {
                 setErrorMsg(data.error || "Błąd rejestracji");
             } else {
-                alert("Użytkownik zarejestrowany. Możesz się teraz zalogować!");
+                alert("Zarejestrowano! Teraz możesz się zalogować.");
                 setAuthMode("login");
             }
         } catch (err) {
@@ -69,9 +74,7 @@ const App = () => {
             if (!res.ok) {
                 setErrorMsg(data.error || "Błąd logowania");
             } else {
-                // Ustawiamy stan zalogowanego usera
                 setLoggedInUser({ token: data.token, username: data.username, userId: data.userId });
-                // Czyścimy formularz
                 setUsername("");
                 setPassword("");
             }
@@ -85,13 +88,12 @@ const App = () => {
         setErrorMsg("");
     };
 
-    // ======= Dodawanie postu =======
+    // ========== DODAWANIE NOWEGO POSTA ==========
     const handleAddPost = async () => {
         if (!loggedInUser) {
             alert("Musisz być zalogowany, aby dodać post");
             return;
         }
-
         if (!newPost.title || !newPost.description) return;
 
         try {
@@ -99,7 +101,7 @@ const App = () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${loggedInUser.token}`, // token JWT
+                    Authorization: `Bearer ${loggedInUser.token}`,
                 },
                 body: JSON.stringify(newPost),
             });
@@ -107,16 +109,16 @@ const App = () => {
             if (!res.ok) {
                 console.error("Error adding post:", data.error);
             } else {
-                setPosts((prevPosts) => [data, ...prevPosts]);
+                setPosts((prev) => [data, ...prev]); // wstawiamy nowy post na początek
                 setNewPost({ title: "", description: "", image: "" });
                 if (fileInputRef.current) fileInputRef.current.value = null;
             }
-        } catch (error) {
-            console.error("Error adding post:", error);
+        } catch (err) {
+            console.error("Error adding post:", err);
         }
     };
 
-    // ======= Upload obrazka =======
+    // ========== OBSŁUGA UPLOADU OBRAZU (BASE64) ==========
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -128,40 +130,36 @@ const App = () => {
         }
     };
 
-    // ======= Lajkowanie posta =======
+    // ========== LIKE / UNLIKE ==========
     const handleLikePost = async (postId) => {
         if (!loggedInUser) {
             alert("Musisz być zalogowany, aby polubić post");
             return;
         }
-
         try {
             const res = await fetch(`${baseURL}/posts/${postId}/like`, {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${loggedInUser.token}`,
-                },
+                headers: { Authorization: `Bearer ${loggedInUser.token}` },
             });
             const updatedPost = await res.json();
             if (!res.ok) {
                 console.error("Error liking post:", updatedPost.error);
             } else {
                 setPosts((prev) =>
-                    prev.map((post) => (post.id === updatedPost.id ? updatedPost : post))
+                    prev.map((p) => (p.id === updatedPost.id ? updatedPost : p))
                 );
             }
-        } catch (error) {
-            console.error("Error liking post:", error);
+        } catch (err) {
+            console.error("Error liking post:", err);
         }
     };
 
-    // ======= Dodawanie komentarzy =======
+    // ========== KOMENTARZE ==========
     const handleAddComment = async (postId, commentBody) => {
         if (!loggedInUser) {
             alert("Musisz być zalogowany, aby komentować");
             return;
         }
-
         if (!commentBody.trim()) return;
 
         try {
@@ -171,78 +169,69 @@ const App = () => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${loggedInUser.token}`,
                 },
-                body: JSON.stringify({
-                    postId,
-                    body: commentBody,
-                }),
+                body: JSON.stringify({ postId, body: commentBody }),
             });
             const newComment = await res.json();
             if (!res.ok) {
                 console.error("Error adding comment:", newComment.error);
             } else {
-                setPosts((prevPosts) =>
-                    prevPosts.map((post) =>
+                setPosts((prev) =>
+                    prev.map((post) =>
                         post.id === postId
-                            ? {
-                                ...post,
-                                comments: [...post.comments, newComment],
-                            }
+                            ? { ...post, comments: [...post.comments, newComment] }
                             : post
                     )
                 );
             }
-        } catch (error) {
-            console.error("Error adding comment:", error);
+        } catch (err) {
+            console.error("Error adding comment:", err);
         }
     };
 
-    // ======= Follow / Unfollow =======
-    const handleFollowUser = async (authorName) => {
+    // ========== FOLLOW / UNFOLLOW AUTORA POSTA ==========
+    const handleFollowAuthor = async (authorId) => {
         if (!loggedInUser) {
-            alert("Musisz być zalogowany, aby obserwować");
+            alert("Musisz być zalogowany, aby followować");
             return;
         }
-
-        // W tym przykładzie nie mamy w post obiektu "authorId", tylko "author" (nazwa).
-        // Musielibyśmy z backendu zwracać authorId. Zakładamy więc, że mamy metodę
-        // do pobierania userId po username – w tym przykładzie pominę, bo to wymaga
-        // dodatkowego endpointu /api/users?username=...
-        //
-        // Dla uproszczenia: pseudo-kod do "odgadnięcia" userId
-        // => normalnie z backendu powinno to przyjść w polu "authorId".
-
-        // Nie mamy userId? Zatem w tym dema pominę tę część.
-        // Zakładamy, że w post w polu "author" zamiast stringu trzymasz obiekt { username, id }
-        // i wtedy:
-        //
-        //   authorId = post.author.id
-        //
-        // Poniżej "udajemy", że mamy taką metodę:
-        // const userToFollowId = getUserIdByUsername(authorName);
-        //
-        // Zmienię minimalnie Post, żeby przechowywać (post.author, post.authorId).
-
-        alert("W tym przykładowym kodzie musimy mieć authorId, aby go zaobserwować!");
+        try {
+            const res = await fetch(`${baseURL}/users/${authorId}/follow`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${loggedInUser.token}`,
+                },
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                console.error("Error following/unfollowing user:", data.error);
+            } else {
+                // Po udanym follow/unfollow pobierz posty ponownie,
+                // aby zaktualizować isFollowingAuthor
+                fetchPosts();
+            }
+        } catch (err) {
+            console.error("Error following user:", err);
+        }
     };
 
-    // ======= Sortowanie postów =======
+    // ========== SORTOWANIE POSTÓW LOKALNIE ==========
+    // (backend daje nam listę postów, a my je filtrujemy/sortujemy)
     const getSortedPosts = () => {
         let sorted = [...posts];
+
         if (sortOption === "followed") {
-            // Filtrowanie po obserwowanych. Uwaga: to wymaga posiadania logicznie:
-            // "czy dany authorId jest przez nas followowany?" -> to też musimy mieć z backendu
-            // Póki co, w tym przykladzie: sortOption "followed" będzie puste,
-            // dopóki nie pobierzemy realnych "followedUsers" z backendu
-            sorted = sorted.filter((p) => followedUsers.includes(p.author));
+            // Pokaż tylko te posty, gdzie isFollowingAuthor = true
+            sorted = sorted.filter((p) => p.isFollowingAuthor);
         } else if (sortOption === "latest") {
             sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         } else if (sortOption === "popular") {
-            sorted.sort((a, b) => b.likes.length - a.likes.length);
+            sorted.sort((a, b) => b.likesCount - a.likesCount);
         }
+
         return sorted;
     };
 
-    // ======= RENDER =======
+    // ========== RENDER ==========
     const sortedPosts = getSortedPosts();
 
     return (
@@ -271,9 +260,7 @@ const App = () => {
                     ) : (
                         <button onClick={handleRegister}>Zarejestruj</button>
                     )}
-                    <button
-                        onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}
-                    >
+                    <button onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}>
                         Przełącz na {authMode === "login" ? "rejestrację" : "logowanie"}
                     </button>
                 </div>
@@ -284,7 +271,7 @@ const App = () => {
                 </div>
             )}
 
-            {/* Formularz dodawania posta (tylko gdy zalogowany) */}
+            {/* Formularz dodawania posta (tylko zalogowany user) */}
             {loggedInUser && (
                 <form
                     onSubmit={(e) => {
@@ -303,9 +290,7 @@ const App = () => {
                     <textarea
                         placeholder="Post Description"
                         value={newPost.description}
-                        onChange={(e) =>
-                            setNewPost({ ...newPost, description: e.target.value })
-                        }
+                        onChange={(e) => setNewPost({ ...newPost, description: e.target.value })}
                         required
                     />
                     <input type="file" accept="image/*" onChange={handleImageUpload} ref={fileInputRef} />
@@ -331,8 +316,8 @@ const App = () => {
                         post={post}
                         loggedInUser={loggedInUser}
                         onLike={() => handleLikePost(post.id)}
-                        onFollowUser={handleFollowUser}
                         onAddComment={(commentBody) => handleAddComment(post.id, commentBody)}
+                        onFollowAuthor={() => handleFollowAuthor(post.authorId)}
                     />
                 ))}
             </div>
@@ -341,7 +326,7 @@ const App = () => {
 };
 
 // Komponent Post
-const Post = ({ post, loggedInUser, onLike, onFollowUser, onAddComment }) => {
+const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor }) => {
     const [commentBody, setCommentBody] = useState("");
 
     const handleSubmitComment = (e) => {
@@ -355,19 +340,24 @@ const Post = ({ post, loggedInUser, onLike, onFollowUser, onAddComment }) => {
             <h2>{post.title}</h2>
             <h4>by {post.author}</h4>
             <p>{post.description}</p>
-            {post.image && (
-                <img src={post.image} alt="Uploaded content" style={{ maxWidth: "100%" }} />
+            {post.image && <img src={post.image} alt="Uploaded" style={{ maxWidth: "100%" }} />}
+
+            <div>
+                <button onClick={onLike}>
+                    {/* Tylko informacja: "Polub / Lubię to" */}
+                    {post.likesCount > 0 ? "Like/Unlike" : "Like"}
+                </button>
+                <span>Likes: {post.likesCount}</span>
+            </div>
+
+            {/* Follow/Unfollow autora, jeżeli user jest zalogowany i autor to nie my sami */}
+            {loggedInUser && post.authorId && post.authorId !== loggedInUser.userId && (
+                <div>
+                    <button onClick={onFollowAuthor}>
+                        {post.isFollowingAuthor ? "Unfollow" : "Follow"}
+                    </button>
+                </div>
             )}
-            <div>
-                <button onClick={onLike}>{post.likes.length > 0 ? "Like/Unlike" : "Like"}</button>
-                <span>Likes: {post.likes.length}</span>
-            </div>
-            <div>
-                {/* Przykład pseudo-przycisku do follow - W DEMO nie działa,
-            bo potrzebujemy do tego realnego authorId w post (nie samego username)
-            i endpointu /api/users/:id/follow */}
-                <button onClick={() => onFollowUser(post.author)}>Follow/Unfollow</button>
-            </div>
 
             <div className="Comments">
                 <h3>Comments</h3>
