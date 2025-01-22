@@ -81,7 +81,7 @@ const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor, onEdit
                 <button className="LikeButton" onClick={onLike}>
                     {post.likesCount > 0 ? "Like/Unlike" : "Like"}
                 </button>
-                <span className="LikeCount">Lajki: {post.likesCount}</span>
+                <span className="LikeCount">Polubienia: {post.likesCount}</span>
 
                 {loggedInUser && post.authorId && post.authorId !== loggedInUser.userId && (
                     <button className="FollowButton" onClick={onFollowAuthor}>

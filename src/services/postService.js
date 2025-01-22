@@ -1,6 +1,5 @@
 const baseURL = "http://localhost:4000/api";
 
-// Pomocnicza funkcja do pobrania nagłówków z tokenem
 const getAuthHeaders = (token) => {
     return {
         Authorization: `Bearer ${token}`,

@@ -28,7 +28,6 @@ const App = () => {
     const [newPost, setNewPost] = useState({ title: "", description: "", image: "" });
     const [sortOption, setSortOption] = useState("latest");
 
-    // Pobieranie postów
     const fetchPosts = async () => {
         try {
             const token = loggedInUser?.token || null;
@@ -43,7 +42,6 @@ const App = () => {
         fetchPosts();
     }, [loggedInUser]);
 
-    // Rejestracja
     const handleRegister = async () => {
         setErrorMsg("");
         try {
@@ -55,7 +53,6 @@ const App = () => {
         }
     };
 
-    // Logowanie
     const handleLogin = async () => {
         setErrorMsg("");
         try {
@@ -72,13 +69,11 @@ const App = () => {
         }
     };
 
-    // Wylogowanie
     const handleLogout = () => {
         setLoggedInUser(null);
         setErrorMsg("");
     };
 
-    // Dodawanie nowego posta
     const handleAddPost = async () => {
         if (!loggedInUser) {
             alert("Musisz być zalogowany, aby dodać post");
@@ -94,7 +89,6 @@ const App = () => {
         }
     };
 
-    // Polubienie posta
     const handleLikePost = async (postId) => {
         if (!loggedInUser) {
             alert("Musisz być zalogowany, aby polubić post");
@@ -108,7 +102,6 @@ const App = () => {
         }
     };
 
-    // Dodanie komentarza
     const handleAddComment = async (postId, commentBody) => {
         if (!loggedInUser) {
             alert("Musisz być zalogowany, aby komentować");
@@ -129,7 +122,6 @@ const App = () => {
         }
     };
 
-    // Follow/Unfollow autora
     const handleFollowAuthor = async (authorId) => {
         if (!loggedInUser) {
             alert("Musisz być zalogowany, aby followować");
@@ -137,14 +129,12 @@ const App = () => {
         }
         try {
             await followAuthor(authorId, loggedInUser.token);
-            // Możemy ponownie pobrać posty, żeby odświeżyć np. isFollowingAuthor
             fetchPosts();
         } catch (err) {
             console.error("Error following user:", err);
         }
     };
 
-    // Edytowanie posta
     const handleEditPost = async (postId, updatedData) => {
         if (!loggedInUser) {
             alert("Musisz być zalogowany, aby edytować post");
@@ -158,7 +148,6 @@ const App = () => {
         }
     };
 
-    // Sortowanie postów
     const getSortedPosts = () => {
         let sorted = [...posts];
         if (sortOption === "followed") {

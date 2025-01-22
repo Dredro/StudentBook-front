@@ -25,5 +25,3 @@ export const loginUser = async (username, password) => {
     }
     return data;
 };
-
-// Możliwe rozszerzenie do funkcji wylogowania, przechowywania tokena w localStorage, itd.
