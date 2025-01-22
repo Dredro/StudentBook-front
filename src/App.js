@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
-import "./App.css";
-
+import "./App.css"
 
 const baseURL = "http://localhost:4000/api"
 
@@ -22,9 +21,7 @@ const App = () => {
         }
         fetch(`${baseURL}/posts`, { headers })
             .then((res) => res.json())
-            .then((data) => {
-                setPosts(data)
-            })
+            .then((data) => setPosts(data))
             .catch((err) => console.error("Error fetching posts:", err))
     }
 
@@ -159,9 +156,7 @@ const App = () => {
             } else {
                 setPosts((prev) =>
                     prev.map((post) =>
-                        post.id === postId
-                            ? { ...post, comments: [...post.comments, newComment] }
-                            : post
+                        post.id === postId ? { ...post, comments: [...post.comments, newComment] } : post
                     )
                 )
             }
@@ -178,9 +173,7 @@ const App = () => {
         try {
             const res = await fetch(`${baseURL}/users/${authorId}/follow`, {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${loggedInUser.token}`
-                }
+                headers: { Authorization: `Bearer ${loggedInUser.token}` }
             })
             const data = await res.json()
             if (!res.ok) {
@@ -238,7 +231,7 @@ const App = () => {
             {!loggedInUser ? (
                 <div className="AuthPanel">
                     <h2>{authMode === "login" ? "Zaloguj się" : "Zarejestruj się"}</h2>
-                    {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
+                    {errorMsg && <p className="ErrorMsg">{errorMsg}</p>}
                     <input
                         type="text"
                         placeholder="Nazwa użytkownika"
@@ -252,18 +245,25 @@ const App = () => {
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     {authMode === "login" ? (
-                        <button onClick={handleLogin}>Zaloguj</button>
+                        <button className="PrimaryButton" onClick={handleLogin}>
+                            Zaloguj
+                        </button>
                     ) : (
-                        <button onClick={handleRegister}>Zarejestruj</button>
+                        <button className="PrimaryButton" onClick={handleRegister}>
+                            Zarejestruj
+                        </button>
                     )}
-                    <button onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}>
-                        Przełącz na {authMode === "login" ? "rejestrację" : "logowanie"}
+                    <button
+                        className="SwitchButton"
+                        onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}
+                    >
+                        {authMode === "login" ? "Przełącz na rejestrację" : "Przełącz na logowanie"}
                     </button>
                 </div>
             ) : (
                 <div className="UserPanel">
-                    <p>Zalogowany jako: {loggedInUser.username}</p>
-                    <button onClick={handleLogout}>Wyloguj</button>
+                    <p>Zalogowany jako: <strong>{loggedInUser.username}</strong></p>
+                    <button className="LogoutButton" onClick={handleLogout}>Wyloguj</button>
                 </div>
             )}
             {loggedInUser && (
@@ -274,6 +274,7 @@ const App = () => {
                     }}
                     className="PostForm"
                 >
+                    <h2>Dodaj nowy post</h2>
                     <input
                         type="text"
                         placeholder="Post Title"
@@ -288,15 +289,15 @@ const App = () => {
                         required
                     />
                     <input type="file" accept="image/*" onChange={handleImageUpload} ref={fileInputRef} />
-                    <button type="submit">Add Post</button>
+                    <button className="PrimaryButton" type="submit">Dodaj post</button>
                 </form>
             )}
             <div className="SortOptions">
-                <label>Sort by:</label>
+                <label>Sortuj:</label>
                 <select onChange={(e) => setSortOption(e.target.value)} value={sortOption}>
-                    <option value="latest">Latest</option>
-                    <option value="popular">Most Liked</option>
-                    <option value="followed">Followed Users</option>
+                    <option value="latest">Najnowsze</option>
+                    <option value="popular">Najwięcej lajków</option>
+                    <option value="followed">Obserwowani</option>
                 </select>
             </div>
             <div className="PostList">
@@ -373,37 +374,41 @@ const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor, onEdit
                         value={editDescription}
                         onChange={(e) => setEditDescription(e.target.value)}
                     />
-                    {editImage && <img src={editImage} alt="Uploaded" style={{ maxWidth: "100%" }} />}
+                    {editImage && <img src={editImage} alt="Uploaded" className="PostImage" />}
                     <input type="file" accept="image/*" onChange={handleChangeImage} />
-                    <button onClick={handleSaveEdit}>Zapisz</button>
-                    <button onClick={handleCancelEditing}>Anuluj</button>
+                    <div className="EditPostActions">
+                        <button className="PrimaryButton" onClick={handleSaveEdit}>Zapisz</button>
+                        <button className="CancelButton" onClick={handleCancelEditing}>Anuluj</button>
+                    </div>
                 </div>
             ) : (
                 <>
                     <h2>{post.title}</h2>
                     <h4>by {post.author}</h4>
                     <p>{post.description}</p>
-                    {post.image && <img src={post.image} alt="Uploaded" style={{ maxWidth: "100%" }} />}
+                    {post.image && <img src={post.image} alt="Uploaded" className="PostImage" />}
                 </>
             )}
-            <div>
-                <button onClick={onLike}>{post.likesCount > 0 ? "Like/Unlike" : "Like"}</button>
-                <span>Likes: {post.likesCount}</span>
+            <div className="PostActions">
+                <button className="LikeButton" onClick={onLike}>
+                    {post.likesCount > 0 ? "Like/Unlike" : "Like"}
+                </button>
+                <span className="LikeCount">Lajki: {post.likesCount}</span>
+                {loggedInUser && post.authorId && post.authorId !== loggedInUser.userId && (
+                    <button className="FollowButton" onClick={onFollowAuthor}>
+                        {post.isFollowingAuthor ? "Unfollow" : "Follow"}
+                    </button>
+                )}
+                {loggedInUser && post.authorId === loggedInUser.userId && !isEditing && (
+                    <button className="EditButton" onClick={handleStartEditing}>Edit</button>
+                )}
             </div>
-            {loggedInUser && post.authorId && post.authorId !== loggedInUser.userId && (
-                <div>
-                    <button onClick={onFollowAuthor}>{post.isFollowingAuthor ? "Unfollow" : "Follow"}</button>
-                </div>
-            )}
-            {loggedInUser && post.authorId === loggedInUser.userId && !isEditing && (
-                <button onClick={handleStartEditing}>Edit</button>
-            )}
             <div className="Comments">
-                <h3>Comments</h3>
+                <h3>Komentarze</h3>
                 <ul>
                     {post.comments.map((comment, index) => (
                         <li key={index}>
-                            <strong>{comment.userName || "Anonim"}</strong>: {comment.body}
+                            <strong>{comment.userName || "Anonim"}:</strong> {comment.body}
                         </li>
                     ))}
                 </ul>
@@ -411,12 +416,12 @@ const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor, onEdit
                     <form onSubmit={handleSubmitComment} className="CommentForm">
                         <input
                             type="text"
-                            placeholder="Add a comment..."
+                            placeholder="Dodaj komentarz..."
                             value={commentBody}
                             onChange={(e) => setCommentBody(e.target.value)}
                             required
                         />
-                        <button type="submit">Add Comment</button>
+                        <button className="PrimaryButton" type="submit">Dodaj</button>
                     </form>
                 )}
             </div>

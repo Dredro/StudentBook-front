@@ -1,24 +1,94 @@
+:root {
+  --primary-color: #4f46e5;
+  --secondary-color: #f9fafb;
+  --text-color: #111827;
+  --error-color: #dc2626;
+  --border-radius: 6px;
+  --transition-speed: 0.2s;
+  --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", sans-serif;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
 .App {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
 }
 
-.AuthPanel,
-.UserPanel {
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.AuthPanel, .UserPanel, .PostForm, .SortOptions {
+  background-color: white;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
   margin-bottom: 20px;
 }
 
-.PostForm {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+.AuthPanel h2, .PostForm h2 {
+  margin-top: 0;
 }
 
-.SortOptions {
-  margin-bottom: 20px;
+.ErrorMsg {
+  color: var(--error-color);
+  margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="file"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  outline: none;
+  transition: border-color var(--transition-speed);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary-color);
+}
+
+button {
+  cursor: pointer;
+  outline: none;
+  border: none;
+  font-size: 14px;
+  transition: background-color var(--transition-speed), opacity var(--transition-speed);
+  border-radius: var(--border-radius);
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.PrimaryButton {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 10px 16px;
+}
+
+.SwitchButton, .LogoutButton, .FollowButton, .LikeButton, .EditButton, .CancelButton {
+  background-color: #6b7280;
+  color: white;
+  padding: 8px 14px;
+  margin-right: 5px;
 }
 
 .PostList {
@@ -28,23 +98,53 @@
 }
 
 .Post {
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
+  background-color: white;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
 }
 
-.Comments {
+.PostImage {
+  max-width: 100%;
+  border-radius: var(--border-radius);
   margin-top: 10px;
+}
+
+.PostActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.LikeCount {
+  font-weight: bold;
+}
+
+.UserPanel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.PostForm h2 {
+  margin-bottom: 15px;
 }
 
 .CommentForm {
-  margin-top: 10px;
   display: flex;
   gap: 10px;
+  margin-top: 10px;
 }
 
 .EditPostForm {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.EditPostActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
 }
