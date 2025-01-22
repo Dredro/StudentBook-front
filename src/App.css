@@ -16,26 +16,40 @@ body {
   color: var(--text-color);
 }
 
+/* Kontener aplikacji, wycentrowany na stronie */
 .App {
-  max-width: 800px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* Wycentrowanie poziome */
   padding: 20px;
 }
 
+/* Szerokość nagłówka dopełnia design, a sam jest wyśrodkowany tekstowo */
 h1 {
   text-align: center;
   margin-bottom: 30px;
 }
 
-.AuthPanel, .UserPanel, .PostForm, .SortOptions {
+/* Panele i formularze wycentrowane, z maksymalną szerokością */
+.AuthPanel,
+.UserPanel,
+.PostForm,
+.SortOptions {
   background-color: white;
   padding: 20px;
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
   margin-bottom: 20px;
+  max-width: 600px;      /* aby nie rozciągały się za bardzo */
+  width: 100%;
+  text-align: center;    /* wyśrodkuj tekst */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.AuthPanel h2, .PostForm h2 {
+.AuthPanel h2,
+.PostForm h2 {
   margin-top: 0;
 }
 
@@ -44,6 +58,7 @@ h1 {
   margin-bottom: 10px;
 }
 
+/* Formularze i pola wypełniają szerokość elementu-rodzica (max 600px) */
 input[type="text"],
 input[type="password"],
 input[type="file"],
@@ -65,6 +80,7 @@ select:focus {
   border-color: var(--primary-color);
 }
 
+/* Przyciski */
 button {
   cursor: pointer;
   outline: none;
@@ -84,35 +100,48 @@ button:hover {
   padding: 10px 16px;
 }
 
-.SwitchButton, .LogoutButton, .FollowButton, .LikeButton, .EditButton, .CancelButton {
+.SwitchButton,
+.LogoutButton,
+.FollowButton,
+.LikeButton,
+.EditButton,
+.CancelButton {
   background-color: #6b7280;
   color: white;
   padding: 8px 14px;
   margin-right: 5px;
 }
 
+/* Lista postów też wycentrowana, każdy post ma max 600px */
 .PostList {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 600px;
 }
 
+/* Pojedynczy post w białym tle, wyśrodkowany wewnątrz */
 .Post {
   background-color: white;
   padding: 20px;
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
+  text-align: center;
 }
 
+/* Obrazek posta */
 .PostImage {
   max-width: 100%;
   border-radius: var(--border-radius);
   margin-top: 10px;
 }
 
+/* Sekcja akcji przy poście */
 .PostActions {
   display: flex;
   align-items: center;
+  justify-content: center; /* wycentruj przyciski */
   gap: 10px;
   margin-top: 10px;
 }
@@ -121,22 +150,29 @@ button:hover {
   font-weight: bold;
 }
 
+/* Górny panel zalogowanego użytkownika */
 .UserPanel {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  max-width: 600px;
 }
 
+/* Nagłówek w formularzu posta */
 .PostForm h2 {
   margin-bottom: 15px;
 }
 
+/* Formularz komentarzy przy poście */
 .CommentForm {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+  width: 100%;
 }
 
+/* Sekcja edycji posta */
 .EditPostForm {
   display: flex;
   flex-direction: column;
@@ -146,5 +182,6 @@ button:hover {
 .EditPostActions {
   display: flex;
   gap: 10px;
+  justify-content: center; /* wycentruj przyciski zapisu/anulacji */
   margin-top: 10px;
 }
