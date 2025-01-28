@@ -6,6 +6,7 @@ import {
     addComment,
     followAuthor,
     editPost,
+    deletePost, // Importowana funkcja usuwania
 } from "./services/postService";
 import { registerUser, loginUser } from "./services/authService";
 
@@ -129,7 +130,7 @@ const App = () => {
         }
         try {
             await followAuthor(authorId, loggedInUser.token);
-            fetchPosts();
+            fetchPosts(); // Re-fetch posts to update follow status
         } catch (err) {
             console.error("Error following user:", err);
         }
@@ -145,6 +146,21 @@ const App = () => {
             setPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
         } catch (err) {
             console.error("Błąd edycji posta:", err);
+        }
+    };
+
+    // Nowa funkcja do obsługi usuwania posta
+    const handleDeletePost = async (postId) => {
+        if (!loggedInUser) {
+            alert("Musisz być zalogowany, aby usunąć post");
+            return;
+        }
+        try {
+            await deletePost(postId, loggedInUser.token);
+            setPosts((prev) => prev.filter((post) => post.id !== postId));
+        } catch (err) {
+            console.error("Błąd podczas usuwania posta:", err);
+            alert("Nie udało się usunąć posta.");
         }
     };
 
@@ -199,6 +215,7 @@ const App = () => {
                 onAddComment={handleAddComment}
                 onFollowAuthor={handleFollowAuthor}
                 onEditPost={handleEditPost}
+                onDeletePost={handleDeletePost} // Przekazujemy funkcję usuwania
             />
         </div>
     );

@@ -8,6 +8,7 @@ const PostList = ({
                       onAddComment,
                       onFollowAuthor,
                       onEditPost,
+                      onDeletePost, // Dodany prop
                   }) => {
     return (
         <div className="PostList">
@@ -20,6 +21,7 @@ const PostList = ({
                     onAddComment={(commentBody) => onAddComment(post.id, commentBody)}
                     onFollowAuthor={() => onFollowAuthor(post.authorId)}
                     onEditPost={onEditPost}
+                    onDeletePost={onDeletePost} // Przekazujemy funkcję usuwania
                 />
             ))}
         </div>

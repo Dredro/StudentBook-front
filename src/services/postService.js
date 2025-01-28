@@ -86,3 +86,16 @@ export const editPost = async (postId, updatedData, token) => {
     }
     return data;
 };
+
+// Dodana funkcja deletePost
+export const deletePost = async (postId, token) => {
+    const res = await fetch(`${baseURL}/posts/${postId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(token),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || "Błąd usuwania posta");
+    }
+    return data;
+};

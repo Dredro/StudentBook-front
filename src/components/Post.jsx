@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 
-const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor, onEditPost }) => {
+const Post = ({
+                  post,
+                  loggedInUser,
+                  onLike,
+                  onAddComment,
+                  onFollowAuthor,
+                  onEditPost,
+                  onDeletePost, // Nowy prop do obsługi usuwania
+              }) => {
     const [commentBody, setCommentBody] = useState("");
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(post.title);
@@ -44,6 +52,12 @@ const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor, onEdit
         }
     };
 
+    const handleDelete = () => {
+        if (window.confirm("Czy na pewno chcesz usunąć ten post?")) {
+            onDeletePost(post.id);
+        }
+    };
+
     return (
         <div className="Post">
             {isEditing ? (
@@ -52,10 +66,12 @@ const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor, onEdit
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Tytuł"
                     />
                     <textarea
                         value={editDescription}
                         onChange={(e) => setEditDescription(e.target.value)}
+                        placeholder="Opis"
                     />
                     {editImage && <img src={editImage} alt="Uploaded" className="PostImage" />}
                     <input type="file" accept="image/*" onChange={handleChangeImage} />
@@ -90,9 +106,14 @@ const Post = ({ post, loggedInUser, onLike, onAddComment, onFollowAuthor, onEdit
                 )}
 
                 {loggedInUser && post.authorId === loggedInUser.userId && !isEditing && (
-                    <button className="EditButton" onClick={handleStartEditing}>
-                        Edit
-                    </button>
+                    <>
+                        <button className="EditButton" onClick={handleStartEditing}>
+                            Edit
+                        </button>
+                        <button className="DeleteButton" onClick={handleDelete}>
+                            Usuń
+                        </button>
+                    </>
                 )}
             </div>
 
